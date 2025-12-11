@@ -118,14 +118,6 @@
     <!-- 双排选项区域 -->
     <div class="input-container">
         <div class="input-group">
-            <label for="drugPrice">KDNL(元/支)</label>
-            <input type="number" id="drugPrice" value="1860" readonly>
-        </div>
-        <div class="input-group">
-            <label for="spec">规格(mg/支)</label>
-            <input type="number" id="spec" value="125" readonly>
-        </div>
-        <div class="input-group">
             <label for="tumorType">患者瘤种</label>
             <select id="tumorType" onchange="setDefaultDoseAndCycle(); calculate()">
                 <option value="cervical1L" selected>宫颈1L</option>
@@ -135,15 +127,27 @@
             </select>
         </div>
         <div class="input-group">
-            <label for="dose">剂量(mg/kg)</label>
-            <input type="number" id="dose" value="10" placeholder="请输入剂量" oninput="calculate()">
-        </div>
-        <div class="input-group">
             <label for="insuranceType">医保类型</label>
             <select id="insuranceType" onchange="calculate()">
                 <option value="employee">职工医保（64%报销）</option>
                 <option value="resident" selected>居民医保（56%报销）</option>
             </select>
+        </div>
+        <div class="input-group">
+            <label for="weight">患者体重(kg)</label>
+            <input type="number" id="weight" value="50" placeholder="请输入体重" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="dose">剂量(mg/kg)</label>
+            <input type="number" id="dose" value="10" placeholder="请输入剂量" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label for="drugPrice">KDNL(元/支)</label>
+            <input type="number" id="drugPrice" value="1860" readonly>
+        </div>
+        <div class="input-group">
+            <label for="spec">规格(mg/支)</label>
+            <input type="number" id="spec" value="125" readonly>
         </div>
         <div class="input-group">
             <label for="weight">患者体重(kg)</label>
