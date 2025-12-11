@@ -113,10 +113,20 @@
 </head>
 <body>
    <!--         <h2>价格计算器</h2>     -->
-    <p class="tip">修改任意参数后，结果将自动更新</p>
+
 
     <!-- 双排选项区域 -->
+    
     <div class="input-container">
+        <div class="input-group">
+            <label for="drugPrice">KDNL(元/支)</label>
+            <input type="number" id="drugPrice" value="1860" readonly>
+        </div>
+        <div class="input-group">
+            <label for="spec">规格(mg/支)</label>
+            <input type="number" id="spec" value="125" readonly>
+        </div>
+    <p class="tip">以下内容修改任意参数后，结果将自动更新</p>
         <div class="input-group">
             <label for="tumorType">患者瘤种</label>
             <select id="tumorType" onchange="setDefaultDoseAndCycle(); calculate()">
@@ -141,15 +151,7 @@
             <label for="dose">剂量(mg/kg)</label>
             <input type="number" id="dose" value="10" placeholder="请输入剂量" oninput="calculate()">
         </div>
-        <div class="input-group">
-            <label for="drugPrice">KDNL(元/支)</label>
-            <input type="number" id="drugPrice" value="1860" readonly>
-        </div>
-        <div class="input-group">
-            <label for="spec">规格(mg/支)</label>
-            <input type="number" id="spec" value="125" readonly>
-        </div>
-    </div>
+
         <div class="input-group">
             <label for="cycle">用药周期</label>
             <select id="cycle" onchange="calculate()">
@@ -157,6 +159,7 @@
                 <option value="14">两周方案（14天）</option>
             </select>
         </div>
+    </div>
     <!-- 无横滑结果区域 -->
     <div class="result" id="result">
         <h3>计算结果</h3>
