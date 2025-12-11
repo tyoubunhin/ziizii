@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>药品价格计算器（实时计算版）</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .input-group { margin: 10px 0; }
+        label { display: inline-block; width: 120px; margin-right: 10px; }
+        input, select { padding: 6px; width: 200px; }
+        .result { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2c3e50; }
+        .tip { color: #666; font-size: 14px; margin: 5px 0 15px; }
+    </style>
+</head>
+<body>
+    <h2>药品价格计算器</h2>
+    <p class="tip">提示：修改任意参数后，结果将自动更新</p>
+    <!-- 输入区域：新增瘤种-用药周期联动 -->
+    <div class="input-group">
+        <label for="drugPrice">药品单价(元)</label>
+        <input type="number" id="drugPrice" value="1860" readonly>
+    </div>
+    <div class="input-group">
+        <label for="spec">药品规格(mg)</label>
+        <input type="number" id="spec" value="125" readonly>
+    </div>
+    <div class="input-group">
+        <label for="tumorType">患者瘤种</label>
+        <select id="tumorType" onchange="setDefaultDoseAndCycle(); calculate()">
+            <option value="cervical1L" selected>宫颈1L</option>
+            <option value="cervical2L">宫颈2L</option>
+            <option value="gastricFirstLine">胃癌1L</option>
+            <option value="other">其他</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="dose">剂量(mg/kg)</label>
+        <input type="number" id="dose" value="10" placeholder="请输入剂量" oninput="calculate()">
+    </div>
+    <div class="input-group">
+        <label for="insuranceType">医保类型</label>
+        <select id="insuranceType" onchange="calculate()">
+            <option value="employee">职工医保（报销64%）</option>
+            <option value="resident" selected>居民医保（报销56%）</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="weight">患者体重(kg)</label>
+        <input type="number" id="weight" value="60" placeholder="请输入体重" oninput="calculate()">
+    </div>
+    <div class="input-group">
+        <label for="cycle">用药周期(天)</label>
+        <select id="cycle" onchange="calculate()">
+            <option value="21">三周方案（21天）</option>
+            <option value="14">两周方案（14天）</option>
+        </select>
+    </div>
+
+    <!-- 结果展示区域：默认显示 -->
+    <div class="result" id="result">
+        <h3>计算结果</h3>
+        <table>
+            <tr>
+                <th>每周期用药支数</th>
+                <th>无报销价格(元)</th>
+                <th>每周期医保报销(元)</th>
+                <th>每周期医保自付(元)</th>
+                <th>全年报销后自付(元)</th>
+                <th>全年无报销价格(元)</th>
+            </tr>
+            <tr>
+                <td id="cycleBottles"></td>
+                <td id="noInsurancePrice"></td>
+                <td id="insuranceReimbursement"></td>
+                <td id="selfPayPerCycle"></td>
+                <td id="annualSelfPay"></td>
+                <td id="annualTotal"></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // 新增：瘤种同时联动剂量和用药周期
+        function setDefaultDoseAndCycle() {
+            const tumorType = document.getElementById('tumorType').value;
+            const doseInput = document.getElementById('dose');
+            const cycleSelect = document.getElementById('cycle');
+
+            // 瘤种→剂量+周期 对应逻辑
+            switch(tumorType) {
+                case 'cervical1L': // 宫颈1L：剂量10mg/kg + 三周方案
+                    doseInput.value = 10;
+                    cycleSelect.value = 21;
+                    break;
+                case 'cervical2L': // 宫颈2L：剂量6mg/kg + 两周方案
+                    doseInput.value = 6;
+                    cycleSelect.value = 14;
+                    break;
+                case 'gastricFirstLine': // 胃癌1L：剂量10mg/kg + 三周方案
+                    doseInput.value = 10;
+                    cycleSelect.value = 21;
+                    break;
+                case 'other': // 其他：清空剂量+周期保留可选（用户自行选择）
+                    doseInput.value = '';
+                    break;
+            }
+        }
+
+        // 核心实时计算逻辑：参数变化立即触发
+        function calculate() {
+            // 获取输入参数
+            const drugPrice = parseFloat(document.getElementById('drugPrice').value);
+            const spec = parseFloat(document.getElementById('spec').value);
+            const dose = parseFloat(document.getElementById('dose').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const insuranceType = document.getElementById('insuranceType').value;
+            const cycleDays = parseInt(document.getElementById('cycle').value);
+
+            // 空值/无效值处理
+            if (!dose || !weight || isNaN(dose) || isNaN(weight)) {
+                document.getElementById('cycleBottles').textContent = '请输入有效参数';
+                document.getElementById('noInsurancePrice').textContent = '-';
+                document.getElementById('insuranceReimbursement').textContent = '-';
+                document.getElementById('selfPayPerCycle').textContent = '-';
+                document.getElementById('annualSelfPay').textContent = '-';
+                document.getElementById('annualTotal').textContent = '-';
+                return;
+            }
+
+            // 按表格公式计算
+            const totalDose = dose * weight; // 总剂量=剂量×体重
+            const cycleBottles = Math.ceil(totalDose / spec); // 支数向上取整
+            const noInsurancePrice = (cycleBottles * drugPrice).toFixed(2); // 无报销价
+            const [reimbursementRate, selfPayRate] = insuranceType === 'employee' ? [0.64, 0.36] : [0.56, 0.44]; // 医保比例
+            const insuranceReimbursement = (noInsurancePrice * reimbursementRate).toFixed(2); // 每周期报销
+            const selfPayPerCycle = (noInsurancePrice * selfPayRate).toFixed(2); // 每周期自付
+            const annualCycles = cycleDays === 21 ? 18 : 26; // 全年周期数
+            const annualSelfPay = (selfPayPerCycle * annualCycles).toFixed(2); // 全年自付
+            const annualTotal = (noInsurancePrice * annualCycles).toFixed(2); // 全年自费
+
+            // 填充实时结果
+            document.getElementById('cycleBottles').textContent = cycleBottles;
+            document.getElementById('noInsurancePrice').textContent = noInsurancePrice;
+            document.getElementById('insuranceReimbursement').textContent = insuranceReimbursement;
+            document.getElementById('selfPayPerCycle').textContent = selfPayPerCycle;
+            document.getElementById('annualSelfPay').textContent = annualSelfPay;
+            document.getElementById('annualTotal').textContent = annualTotal;
+        }
+
+        // 页面加载时初始化参数并计算结果
+        window.onload = function() {
+            setDefaultDoseAndCycle();
+            calculate();
+        };
+    </script>
+</body>
+</html>
