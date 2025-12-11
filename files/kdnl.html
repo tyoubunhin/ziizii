@@ -142,13 +142,6 @@
             <input type="number" id="dose" value="10" placeholder="请输入剂量" oninput="calculate()">
         </div>
         <div class="input-group">
-            <label for="cycle">用药周期</label>
-            <select id="cycle" onchange="calculate()">
-                <option value="21">三周方案（21天）</option>
-                <option value="14">两周方案（14天）</option>
-            </select>
-        </div>
-        <div class="input-group">
             <label for="drugPrice">KDNL(元/支)</label>
             <input type="number" id="drugPrice" value="1860" readonly>
         </div>
@@ -157,7 +150,13 @@
             <input type="number" id="spec" value="125" readonly>
         </div>
     </div>
-
+        <div class="input-group">
+            <label for="cycle">用药周期</label>
+            <select id="cycle" onchange="calculate()">
+                <option value="21">三周方案（21天）</option>
+                <option value="14">两周方案（14天）</option>
+            </select>
+        </div>
     <!-- 无横滑结果区域 -->
     <div class="result" id="result">
         <h3>计算结果</h3>
