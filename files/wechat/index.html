@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>微信账单1:1还原版（无换行+截图一致）</title>
+    <title>微信账单1:1还原版（底图对比版）</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
@@ -52,7 +52,7 @@
             background: #dc3545;
             color: #fff;
         }
-        /* 账单容器：固定尺寸，避免缩放导致换行 */
+        /* 账单容器：固定尺寸，底图和内容层都匹配此尺寸 */
         .wechat-bill {
             width: 370px;
             height: 720px;
@@ -62,24 +62,23 @@
             position: relative;
             overflow: hidden;
             margin-top: 80px;
-            /* 禁止内容缩放，确保截图和显示一致 */
-            transform: none !important;
         }
-        /* 底图层：正常切换，低透明度不干扰 */
+        /* 底图层：关键修改——显示时不透明，方便对比；隐藏时完全透明 */
         .bill-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            opacity: 0; /* 默认隐藏 */
+            transition: opacity 0.3s ease-in-out; /* 平滑切换 */
             z-index: 1;
+            object-fit: cover; /* 底图适配容器，不拉伸变形 */
         }
         .bill-bg.show {
-            opacity: 0.2;
+            opacity: 1; /* 显示时完全不透明，清晰对比 */
         }
-        /* 内容层：绝对定位，禁止不必要换行 */
+        /* 内容层：关键修改——透明背景，让底图透出来方便对比 */
         .bill-content {
             position: absolute;
             top: 0;
@@ -88,7 +87,7 @@
             height: 100%;
             padding: 30px 25px;
             z-index: 2;
-            background: #fff; /* 纯白色背景，避免底图透色导致截图偏差 */
+            background: transparent; /* 透明背景，显示底图 */
         }
         /* 关闭按钮 */
         .close-btn {
@@ -127,7 +126,7 @@
             color: #333;
             line-height: 1.4;
             margin-bottom: 8px;
-            white-space: nowrap; /* 禁止商户名换行 */
+            white-space: nowrap;
         }
         /* 金额：Wechat Sans Std字体+禁止换行 */
         .amount {
@@ -138,9 +137,9 @@
             font-family: "Wechat Sans Std", "Wechat Sans", "PingFang SC", "微软雅黑", sans-serif !important;
             margin-bottom: 25px;
             line-height: 1.2;
-            white-space: nowrap; /* 禁止金额换行 */
+            white-space: nowrap;
         }
-        /* 详情列表：精准控制换行，避免乱换行 */
+        /* 详情列表：精准控制换行 */
         .detail-list {
             font-size: 13px;
             line-height: 1.6;
@@ -156,20 +155,19 @@
             width: 85px;
             color: #999;
             flex-shrink: 0;
-            white-space: nowrap; /* 标签禁止换行 */
+            white-space: nowrap;
         }
         .detail-value {
             color: #333;
             flex: 1;
-            /* 仅长单号允许换行，其他文字禁止 */
-            word-break: break-all; /* 仅针对长数字/单号换行，普通文字不换 */
+            word-break: break-all; /* 仅长单号换行 */
         }
         .detail-sub {
             color: #666;
             font-size: 12px;
             margin-left: 85px;
             margin-top: 2px;
-            white-space: normal; /* 说明文字允许正常换行 */
+            white-space: normal;
         }
         /* 小程序区域：禁止换行 */
         .mini-program {
@@ -248,6 +246,7 @@
     </div>
 
     <div class="wechat-bill" id="billContainer">
+        <!-- 底图链接确保有效，与容器尺寸匹配 -->
         <img src="http://ziizii.cc/files/wechat/bg.jpg" class="bill-bg" id="billBg">
         <div class="bill-content" id="billContent">
             <div class="close-btn">×</div>
@@ -328,9 +327,11 @@
         const editableEls = document.querySelectorAll('.editable');
         const billContainer = document.getElementById('billContainer');
 
-        // 底图切换
+        // 修复底图切换：强制触发重绘，确保视觉变化
         toggleBgBtn.addEventListener('click', function() {
             bgEl.classList.toggle('show');
+            // 强制DOM重绘，解决浏览器渲染缓存问题
+            bgEl.offsetHeight; 
             this.textContent = bgEl.classList.contains('show') ? '隐藏底图' : '显示底图';
         });
 
@@ -367,36 +368,27 @@
             }
         });
 
-        // 保存图片：核心修复换行+截图一致问题
+        // 保存图片：隐藏底图，确保截图纯净无重影
         document.getElementById('saveImg').addEventListener('click', async function() {
             try {
-                // 隐藏底图，确保截图只有内容层
                 const isBgShow = bgEl.classList.contains('show');
                 if (isBgShow) bgEl.classList.remove('show');
+                bgEl.offsetHeight; // 强制重绘
 
-                // 动态获取容器尺寸，避免固定值导致偏差
                 const containerWidth = billContainer.offsetWidth;
                 const containerHeight = billContainer.offsetHeight;
 
                 const canvas = await html2canvas(billContainer, {
-                    scale: 3, // 高清截图
+                    scale: 3,
                     useCORS: true,
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: containerWidth, // 匹配容器宽度，避免换行
-                    windowHeight: containerHeight, // 匹配容器高度
-                    allowTaint: true,
-                    letterRendering: true, // 精准渲染文字，避免变形
-                    imageTimeout: 10000, // 延长图片加载超时，确保Logo加载
-                    // 禁止自动调整布局，确保和显示一致
+                    windowWidth: containerWidth,
+                    windowHeight: containerHeight,
+                    letterRendering: true,
                     preserveDrawingBuffer: true
                 });
 
-                // 恢复底图状态
                 if (isBgShow) bgEl.classList.add('show');
 
-                // 生成图片并下载
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
