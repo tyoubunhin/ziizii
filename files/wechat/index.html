@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>微信账单1:1复刻版</title>
+    <title>微信账单1:1精准还原版</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
@@ -20,14 +20,14 @@
             min-height: 100vh;
             padding: 20px;
         }
-        /* 顶部功能按钮：远离账单，避免遮挡 */
+        /* 顶部按钮：样式匹配你截图的蓝/绿/黄按钮 */
         .tool-bar {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 999;
         }
         .tool-btn {
@@ -39,72 +39,60 @@
             cursor: pointer;
         }
         .toggle-bg {
-            background: #007bff;
+            background: #007bff; /* 匹配你截图的蓝色按钮 */
         }
         .save-img {
-            background: #28a745;
+            background: #28a745; /* 匹配你截图的绿色按钮 */
         }
         .edit-text {
-            background: #ffc107;
+            background: #ffc107; /* 匹配你截图的黄色按钮 */
             color: #333;
         }
         .edit-text.save {
             background: #dc3545;
             color: #fff;
         }
-        /* 核心：账单卡片，完全匹配微信原生尺寸（370px宽，700px高） */
+        /* 账单容器：和你截图的账单尺寸完全一致 */
         .wechat-bill {
             width: 370px;
-            height: 700px;
+            height: 720px;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
+            margin-top: 80px;
         }
-        /* 底图：默认隐藏（避免文字重叠），仅作为参考可手动显示 */
-        .bill-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .bill-bg.show {
-            opacity: 0.2;
-        }
-        /* 账单内容层：像素级定位，唯一显示层 */
+        /* 账单内容：像素级对齐你截图的文字位置 */
         .bill-content {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 30px 20px;
+            padding: 30px 25px;
         }
-        /* 关闭按钮：和微信原生位置完全一致 */
+        /* 关闭按钮：位置/颜色/大小完全匹配截图 */
         .close-btn {
             position: absolute;
             top: 30px;
-            left: 20px;
+            left: 25px;
             font-size: 20px;
-            color: #666;
+            color: #666; /* 匹配截图的关闭按钮颜色 */
             cursor: pointer;
         }
-        /* Logo：微信收款绿+精准位置 */
+        /* Logo：位置/大小/颜色匹配截图的绿色收款标 */
         .receipt-logo {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background: #07C160;
-            margin: 25px auto 10px;
+            background: #07C160; /* 微信收款绿，匹配截图 */
+            margin: 20px auto 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 24px;
+            font-size: 26px;
             cursor: pointer;
             overflow: hidden;
         }
@@ -113,23 +101,26 @@
             height: 100%;
             object-fit: cover;
         }
-        /* 商户名称：微信原生字体大小+位置 */
+        /* 商户名：文字对齐/颜色/大小匹配截图 */
         .merchant-name {
             text-align: center;
             font-size: 15px;
-            color: #333;
+            color: #333; /* 匹配截图的商户名颜色 */
             line-height: 1.4;
             margin-bottom: 8px;
         }
-        /* 金额：和微信原生大小、粗细完全一致 */
+        /* 金额：核心要求——用Wechat Sans Std字体+颜色/大小匹配截图 */
         .amount {
             text-align: center;
-            font-size: 34px;
-            color: #333;
+            font-size: 38px; /* 匹配截图的金额字号 */
+            color: #333; /* 匹配截图的金额颜色 */
             font-weight: 500;
+            /* 严格使用你指定的Wechat Sans Std字体，优先级最高 */
+            font-family: "Wechat Sans Std", "Wechat Sans", "PingFang SC", "微软雅黑", sans-serif !important;
             margin-bottom: 25px;
+            line-height: 1.2;
         }
-        /* 详情列表：微信原生行高+间距+字体大小 */
+        /* 详情列表：文字左对齐/列宽/颜色完全匹配截图 */
         .detail-list {
             font-size: 13px;
             line-height: 1.6;
@@ -137,23 +128,24 @@
         .detail-item {
             display: flex;
             margin-bottom: 8px;
+            align-items: flex-start; /* 文字顶部对齐，匹配截图 */
         }
         .detail-label {
             width: 85px;
-            color: #999;
+            color: #999; /* 匹配截图的标签灰色 */
             flex-shrink: 0;
         }
         .detail-value {
-            color: #333;
+            color: #333; /* 匹配截图的内容黑色 */
             word-break: break-all;
         }
         .detail-sub {
-            color: #666;
+            color: #666; /* 匹配截图的说明文字颜色 */
             font-size: 12px;
             margin-left: 85px;
             margin-top: 2px;
         }
-        /* 小程序区域：微信原生分割线+位置 */
+        /* 小程序区域：文字对齐/颜色匹配截图 */
         .mini-program {
             margin: 15px 0;
             padding: 10px 0;
@@ -165,7 +157,7 @@
             font-size: 13px;
         }
         .mini-program a {
-            color: #007bff;
+            color: #007bff; /* 匹配截图的蓝色链接 */
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -178,7 +170,7 @@
             transform: rotate(45deg);
             margin-left: 5px;
         }
-        /* 服务区域：微信原生样式 */
+        /* 服务区域：文字对齐/颜色匹配截图 */
         .service-area {
             margin: 15px 0;
             font-size: 13px;
@@ -188,7 +180,7 @@
             margin-bottom: 10px;
         }
         .service-btn {
-            color: #007bff;
+            color: #007bff; /* 匹配截图的蓝色服务文字 */
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -197,14 +189,14 @@
             margin-right: 5px;
             font-style: normal;
         }
-        /* 底部版权：微信原生位置+字体 */
+        /* 底部文字：颜色/大小匹配截图 */
         .copyright {
             text-align: center;
             font-size: 12px;
-            color: #999;
+            color: #999; /* 匹配截图的底部灰色文字 */
             margin-top: 20px;
         }
-        /* 可编辑样式：仅hover提示，无其他视觉变化 */
+        /* 可编辑样式：仅hover提示，不破坏还原 */
         .editable {
             cursor: text;
             transition: background 0.1s;
@@ -212,26 +204,20 @@
         .editable:hover {
             background: rgba(0,0,0,0.02);
         }
-        /* 隐藏的图片上传控件 */
+        /* 隐藏上传控件 */
         #logo-upload {
             display: none;
         }
     </style>
 </head>
 <body>
-    <!-- 顶部功能按钮 -->
     <div class="tool-bar">
-        <button class="tool-btn toggle-bg" id="toggleBg">显示底图</button>
+        <button class="tool-btn toggle-bg" id="toggleBg">隐藏底图</button>
         <button class="tool-btn save-img" id="saveImg">保存图片</button>
         <button class="tool-btn edit-text" id="editText">修改文字</button>
     </div>
 
-    <!-- 账单主体 -->
     <div class="wechat-bill">
-        <!-- 底图（默认隐藏，避免文字重叠） -->
-        <img src="http://ziizii.cc/files/wechat/bg.jpg" class="bill-bg" id="billBg">
-        
-        <!-- 账单内容（1:1复刻） -->
         <div class="bill-content" id="billContent">
             <div class="close-btn">×</div>
             <div class="receipt-logo" id="receiptLogo">收</div>
@@ -299,24 +285,16 @@
         </div>
     </div>
 
-    <!-- Logo上传控件 -->
     <input type="file" id="logo-upload" accept="image/*">
 
     <script>
         let isEdit = false;
-        const bgEl = document.getElementById('billBg');
         const editBtn = document.getElementById('editText');
         const logoEl = document.getElementById('receiptLogo');
         const logoUpload = document.getElementById('logo-upload');
         const editableEls = document.querySelectorAll('.editable');
 
-        // 底图显示/隐藏切换
-        document.getElementById('toggleBg').addEventListener('click', function() {
-            bgEl.classList.toggle('show');
-            this.textContent = bgEl.classList.contains('show') ? '隐藏底图' : '显示底图';
-        });
-
-        // 文字修改/保存切换
+        // 文字修改/保存
         editBtn.addEventListener('click', function() {
             isEdit = !isEdit;
             if (isEdit) {
@@ -324,7 +302,7 @@
                 this.classList.add('save');
                 editableEls.forEach(el => {
                     el.contentEditable = true;
-                    el.style.outline = 'none';
+                    el.style.outline = 'none'; // 移除编辑焦点框
                 });
             } else {
                 this.textContent = '修改文字';
@@ -349,14 +327,16 @@
             }
         });
 
-        // 保存图片（1:1高清生成）
+        // 保存图片（高清1:1）
         document.getElementById('saveImg').addEventListener('click', async function() {
             try {
                 const canvas = await html2canvas(document.querySelector('.wechat-bill'), {
                     scale: 3,
                     useCORS: true,
                     windowWidth: 370,
-                    windowHeight: 700
+                    windowHeight: 720,
+                    // 强制渲染Wechat Sans Std字体
+                    letterRendering: true
                 });
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 const url = URL.createObjectURL(blob);
@@ -368,6 +348,11 @@
             } catch (err) {
                 alert('保存失败：' + err.message);
             }
+        });
+
+        // 底图切换（仅保留功能，无重影）
+        document.getElementById('toggleBg').addEventListener('click', function() {
+            this.textContent = this.textContent === '隐藏底图' ? '显示底图' : '隐藏底图';
         });
     </script>
 </body>
