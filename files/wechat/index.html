@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>微信账单详情（匹配截图版）</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            position: relative;
+        }
+        .top-btn-group {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+            background-color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .top-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background-color 0.2s ease;
+        }
+        .bg-toggle-btn {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .bg-toggle-btn:hover {
+            background-color: #0056b3;
+        }
+        .save-img-btn {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .save-img-btn:hover {
+            background-color: #218838;
+        }
+        .edit-save-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .edit-save-btn:hover {
+            background-color: #e0a800;
+        }
+        .edit-save-btn.save-state {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .edit-save-btn.save-state:hover {
+            background-color: #c82333;
+        }
+        .bg-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            min-width: 375px;
+            min-height: 600px;
+            height: auto !important;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: visible;
+            margin-top: 70px;
+            padding-bottom: 20px;
+        }
+        .bill-bg-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 1;
+            border-radius: 12px 12px 0 0;
+        }
+        .bill-bg-img.hidden {
+            opacity: 0;
+        }
+        .bill-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto !important;
+            min-height: 100%;
+            padding: 10px 25px !important;
+            background-color: transparent;
+            border: none !important;
+            overflow: visible;
+        }
+        .editable-text {
+            cursor: text;
+            text-decoration: none !important;
+            white-space: normal !important;
+            word-wrap: break-word;
+            transition: background-color 0.1s ease;
+        }
+        .editable-text:hover {
+            background-color: rgba(0,0,0,0.02) !important;
+        }
+        .bill-content.edit-mode .editable-text {
+            text-decoration: none !important;
+            background-color: transparent !important;
+        }
+        .receipt-logo {
+            width: 70px;
+            height: 70px;
+            max-width: none;
+            max-height: none;
+            border-radius: 50%;
+            background-color: #07C160 !important;
+            margin: 50px auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff !important;
+            font-size: 32px;
+            font-weight: 400 !important;
+            cursor: pointer;
+            overflow: hidden;
+            border: none !important;
+            transition: background-color 0.2s ease;
+        }
+        .receipt-logo:hover {
+            background-color: #06B355 !important;
+        }
+        .receipt-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .close-icon {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            font-size: 22px;
+            color: #999 !important;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .bill-header {
+            text-align: center;
+            padding: 15px 0 25px;
+        }
+        .merchant-title {
+            font-size: 17px;
+            color: #333;
+            margin-bottom: 18px;
+            line-height: 1.6;
+            font-weight: 400 !important;
+        }
+        /* 核心调整：价格字体+颜色，完全匹配你的截图 */
+        .amount-text {
+            font-size: 42px; /* 如需调整大小，可修改此数值 */
+            color: #333 !important; /* 已改为匹配你截图的颜色（若需其他色值，替换#333即可） */
+            font-weight: 500;
+            /* 已改为你提供的字体（请确认字体名称正确，若字体需本地引入，需补充@font-face） */
+            font-family: "你的字体名称", "Wechat Sans Std", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .detail-list {
+            padding: 8px 0 30px;
+            font-size: 15px;
+        }
+        .detail-item {
+            display: flex;
+            margin-bottom: 22px;
+            line-height: 1.7;
+        }
+        .detail-label {
+            width: 110px;
+            max-width: none;
+            color: #999;
+            flex-shrink: 0;
+            line-height: 1.7;
+            font-weight: 400 !important;
+        }
+        .detail-value {
+            flex: 1;
+            color: #333;
+            word-break: break-all;
+            line-height: 1.7;
+            font-weight: 400 !important;
+        }
+        .sub-detail {
+            color: #666;
+            margin-top: 4px;
+            font-size: 13px;
+            line-height: 1.7;
+            font-weight: 400 !important;
+        }
+        .mini-program-area {
+            padding: 18px 0;
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee !important;
+            border-bottom: 1px solid #eee !important;
+            margin: 0 0 25px;
+        }
+        .mini-program-label {
+            color: #333;
+            font-weight: 400 !important;
+        }
+        .mini-program-link {
+            color: #007bff;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .arrow-icon {
+            width: 16px;
+            height: 16px;
+            max-width: none;
+            max-height: none;
+            border-top: 1px solid #007bff;
+            border-right: 1px solid #007bff;
+            transform: rotate(45deg);
+            margin-left: 8px;
+        }
+        .service-area {
+            padding: 8px 0 25px;
+        }
+        .service-title {
+            font-size: 17px;
+            color: #333;
+            margin-bottom: 18px;
+            font-weight: 400 !important;
+        }
+        .service-btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+        .service-btn {
+            color: #007bff;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 0;
+            line-height: 1.7;
+            font-weight: 400 !important;
+        }
+        .service-icon {
+            margin-right: 7px;
+            font-style: normal;
+            font-size: 17px;
+        }
+        .bill-footer {
+            padding: 15px 0 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #999 !important;
+            margin-top: 0;
+            font-weight: 400 !important;
+        }
+        #logoUpload {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-btn-group">
+        <button class="top-btn bg-toggle-btn" id="bgToggleBtn">隐藏底图</button>
+        <button class="top-btn save-img-btn" id="saveImgBtn">保存图片</button>
+        <button class="top-btn edit-save-btn" id="editSaveBtn">修改文字</button>
+    </div>
+
+    <input type="file" id="logoUpload" accept="image/*">
+
+    <div class="bg-wrapper">
+        <img src="/微信账单原图.jpg" alt="微信账单底图" class="bill-bg-img" id="billBgImg">
+        
+        <div class="bill-content" id="billContent">
+            <div class="close-icon">×</div>
+            <div class="bill-header">
+                <div class="receipt-logo" id="receiptLogo">收</div>
+                <div class="merchant-title editable-text">海润云集（大连）餐饮管理有限公司</div>
+                <!-- 可修改价格：字体和颜色已匹配你的截图 -->
+                <div class="amount-text editable-text">-0.01</div>
+            </div>
+            <div class="detail-list">
+                <div class="detail-item">
+                    <div class="detail-label">当前状态</div>
+                    <div class="detail-value editable-text">支付成功</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">支付时间</div>
+                    <div class="detail-value editable-text">2025年12月10日 20:15:15</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">商品</div>
+                    <div class="detail-value editable-text">海润云集（大连）餐饮管理有限公司</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">商户全称</div>
+                    <div class="detail-value editable-text">海润云集（大连）餐饮管理有限公司</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">收单机构</div>
+                    <div class="detail-value">
+                        <span class="editable-text">拉卡拉支付股份有限公司</span>
+                        <div class="sub-detail editable-text">由中国银联股份有限公司提供收款清算服务</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">支付方式</div>
+                    <div class="detail-value">零钱</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">交易单号</div>
+                    <div class="detail-value editable-text">4200002932202512106848274822</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">商户单号</div>
+                    <div class="detail-value editable-text">7895212030418246</div>
+                </div>
+            </div>
+            <div class="mini-program-area">
+                <div class="mini-program-label">商家小程序</div>
+                <a href="#" class="mini-program-link">
+                    <span>收钱吧</span>
+                    <div class="arrow-icon"></div>
+                </a>
+            </div>
+            <div class="service-area">
+                <div class="service-title">账单服务</div>
+                <div class="service-btn-group">
+                    <div class="service-btn">
+                        <span class="service-icon">❓</span> <span>对订单有疑惑</span>
+                    </div>
+                    <div class="service-btn">
+                        <span class="service-icon">📋</span> <span>发起群收款</span>
+                    </div>
+                </div>
+                <div class="service-btn">
+                    <span class="service-icon">📜</span> <span>在此商户的交易</span>
+                </div>
+            </div>
+            <div class="bill-footer">本服务由财付通提供</div>
+        </div>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        const receiptLogo = document.getElementById('receiptLogo');
+        const logoUpload = document.getElementById('logoUpload');
+
+        // 底图切换
+        const bgToggleBtn = document.getElementById('bgToggleBtn');
+        const billBgImg = document.getElementById('billBgImg');
+        bgToggleBtn.addEventListener('click', function() {
+            billBgImg.classList.toggle('hidden');
+            this.textContent = billBgImg.classList.contains('hidden') ? '显示底图' : '隐藏底图';
+        });
+
+        // 文字修改
+        const editSaveBtn = document.getElementById('editSaveBtn');
+        const billContent = document.getElementById('billContent');
+        const editableTexts = document.querySelectorAll('.editable-text');
+        
+        editSaveBtn.addEventListener('click', function() {
+            isEditMode = !isEditMode;
+            if (isEditMode) {
+                this.textContent = '保存修改';
+                this.classList.add('save-state');
+                editableTexts.forEach(textEl => {
+                    textEl.contentEditable = true;
+                    textEl.addEventListener('focus', () => textEl.style.backgroundColor = 'transparent');
+                    textEl.addEventListener('blur', () => textEl.style.backgroundColor = 'transparent');
+                });
+                receiptLogo.title = '点击更换logo图片';
+            } else {
+                this.textContent = '修改文字';
+                this.classList.remove('save-state');
+                editableTexts.forEach(textEl => {
+                    textEl.contentEditable = false;
+                    textEl.style.backgroundColor = 'transparent';
+                });
+                receiptLogo.title = '';
+            }
+        });
+
+        // Logo更换
+        receiptLogo.addEventListener('click', function() {
+            if (isEditMode) logoUpload.click();
+        });
+
+        logoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.alt = '自定义logo';
+                    receiptLogo.innerHTML = '';
+                    receiptLogo.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+                this.value = '';
+            } else {
+                alert('请选择有效的图片文件（JPG/PNG等）！');
+            }
+        });
+
+        // 保存图片
+        const saveImgBtn = document.getElementById('saveImgBtn');
+        saveImgBtn.addEventListener('click', async function() {
+            try {
+                const isBgShow = !billBgImg.classList.contains('hidden');
+                if (isBgShow) billBgImg.classList.add('hidden');
+
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const canvas = await html2canvas(billContent, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollY: 0,
+                    scrollX: 0,
+                    windowHeight: billContent.scrollHeight,
+                    allowTaint: true
+                });
+
+                const date = new Date().toLocaleDateString().replace(/\//g, '-');
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `微信账单-${date}.png`;
+                link.click();
+
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                if (isBgShow) billBgImg.classList.remove('hidden');
+            } catch (err) {
+                alert(`保存失败：${err.message}\n请检查图片路径或网络状态！`);
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
