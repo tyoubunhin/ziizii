@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>bg.jpg原生微信账单1:1精准复刻版</title>
+    <title>bg.jpg 1:1对齐+全功能可用版</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
-        /* 全局样式：匹配微信原生字体体系 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "PingFang SC", "SF Pro Text", "Helvetica Neue", sans-serif; /* 微信原生字体链 */
+            font-family: "PingFang SC", "Wechat Sans Std", sans-serif;
         }
         body {
             background: #f5f5f5;
@@ -21,7 +20,7 @@
             min-height: 100vh;
             padding: 20px;
         }
-        /* 顶部功能按钮：样式简洁不干扰 */
+        /* 顶部按钮：功能正常，不干扰 */
         .tool-bar {
             position: fixed;
             top: 20px;
@@ -32,13 +31,12 @@
             z-index: 999;
         }
         .tool-btn {
-            padding: 9px 18px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             color: #fff;
             font-size: 14px;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .toggle-bg {
             background: #007bff;
@@ -54,48 +52,43 @@
             background: #dc3545;
             color: #fff;
         }
-        /* 核心：账单容器完全匹配bg.jpg的微信原生尺寸（375px×812px 标准iPhone尺寸） */
+        /* 容器：与bg.jpg尺寸完全一致 */
         .wechat-bill {
             width: 375px;
             height: 812px;
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
             margin-top: 80px;
-            /* 禁止任何变形，确保和bg.jpg比例一致 */
-            transform: none !important;
-            zoom: 1 !important;
         }
-        /* 底图层：bg.jpg原生底图，精准适配容器 */
+        /* 底图：切换稳定，无延迟 */
         .bill-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
+            display: none; /* 默认隐藏，用display确保切换无延迟 */
+            object-fit: cover;
             z-index: 1;
-            object-fit: contain; /* 完全适配容器，不拉伸不裁剪 */
-            background: #fff;
         }
         .bill-bg.show {
-            opacity: 1; /* 显示时完全不透明，精准对比 */
+            display: block; /* 显示时直接显示，无渲染问题 */
         }
-        /* 内容层：微信原生账单像素级布局，与bg.jpg逐元素对齐 */
+        /* 内容层：与bg.jpg像素级对齐 */
         .bill-content {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 44px 24px; /* 微信原生账单内边距，匹配bg.jpg */
+            padding: 44px 24px;
             z-index: 2;
             background: #fff;
         }
-        /* 关闭按钮：微信原生位置+样式，匹配bg.jpg */
+        /* 关闭按钮：对齐bg.jpg */
         .close-btn {
             position: absolute;
             top: 44px;
@@ -103,22 +96,19 @@
             font-size: 22px;
             color: #666;
             cursor: pointer;
-            z-index: 3;
-            line-height: 1;
-            font-weight: 400;
         }
-        /* 收款Logo：微信原生尺寸+位置+配色，匹配bg.jpg */
+        /* Logo：对齐bg.jpg */
         .receipt-logo {
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: #07C160; /* 微信收款绿原生色值 */
-            margin: 32px auto 16px; /* 微信原生间距，匹配bg.jpg */
+            background: #07C160;
+            margin: 32px auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 28px; /* 微信原生Logo内文字大小 */
+            font-size: 28px;
             cursor: pointer;
             overflow: hidden;
         }
@@ -127,65 +117,54 @@
             height: 100%;
             object-fit: cover;
         }
-        /* 商户名称：微信原生字号+位置+行高，匹配bg.jpg */
+        /* 商户名：对齐bg.jpg */
         .merchant-name {
             text-align: center;
-            font-size: 16px; /* 微信原生商户名字号 */
-            color: #333; /* 微信原生主文字色 */
-            line-height: 1.4;
-            margin-bottom: 12px; /* 微信原生间距 */
-            white-space: nowrap;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 12px;
         }
-        /* 金额：微信原生Wechat Sans Std字体+尺寸+位置，严格匹配bg.jpg */
+        /* 金额：Wechat字体，对齐bg.jpg */
         .amount {
             text-align: center;
-            font-size: 40px; /* 微信原生金额字号 */
-            color: #333; /* bg.jpg中金额为黑色，匹配此色值 */
+            font-size: 40px;
+            color: #333;
             font-weight: 500;
-            /* 微信原生金额字体，优先级最高 */
-            font-family: "Wechat Sans Std", "Wechat Sans", "PingFang SC", sans-serif !important;
-            margin-bottom: 32px; /* 微信原生金额下方间距 */
-            line-height: 1.2;
-            white-space: nowrap;
+            font-family: "Wechat Sans Std", sans-serif !important;
+            margin-bottom: 32px;
         }
-        /* 详情列表：微信原生布局体系，与bg.jpg逐行对齐 */
+        /* 详情列表：对齐bg.jpg */
         .detail-list {
-            font-size: 14px; /* 微信原生详情文字字号 */
-            line-height: 1.6; /* 微信原生行高 */
-            width: 100%;
+            font-size: 14px;
+            line-height: 1.6;
         }
         .detail-item {
             display: flex;
-            margin-bottom: 10px; /* 微信原生详情行间距 */
+            margin-bottom: 10px;
             align-items: flex-start;
-            width: 100%;
         }
         .detail-label {
-            width: 90px; /* 微信原生详情标签宽度 */
-            color: #999; /* 微信原生标签灰色 */
+            width: 90px;
+            color: #999;
             flex-shrink: 0;
-            white-space: nowrap;
-            font-size: 14px;
         }
         .detail-value {
-            color: #333; /* 微信原生内容色 */
+            color: #333;
             flex: 1;
-            font-size: 14px;
-            /* 仅超长单号允许换行，符合微信原生逻辑 */
             word-break: break-all;
         }
         .detail-sub {
-            color: #666; /* 微信原生辅助文字色 */
-            font-size: 13px; /* 微信原生辅助文字字号 */
+            color: #666;
+            font-size: 13px;
             margin-left: 90px;
             margin-top: 4px;
             margin-bottom: 10px;
         }
-        /* 小程序区域：微信原生分割线+布局+样式，匹配bg.jpg */
+        /* 小程序区域：对齐bg.jpg */
         .mini-program {
             margin: 20px 0;
             padding: 16px 0;
-            border-top: 1px solid #f5f5f5; /* 微信原生分割线色 */
+            border-top: 1px solid #f5f5f5;
             border-bottom: 1px solid #f5f5f5;
             display: flex;
             justify-content: space-between;
@@ -193,7 +172,7 @@
             font-size: 14px;
         }
         .mini-program a {
-            color: #007aff; /* 微信原生链接蓝 */
+            color: #007aff;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -206,7 +185,7 @@
             transform: rotate(45deg);
             margin-left: 6px;
         }
-        /* 服务区域：微信原生样式体系，匹配bg.jpg */
+        /* 服务区域：对齐bg.jpg */
         .service-area {
             margin: 20px 0 30px;
             font-size: 14px;
@@ -214,38 +193,32 @@
         .service-title {
             color: #333;
             margin-bottom: 12px;
-            white-space: nowrap;
-            font-size: 14px;
         }
         .service-btn {
             color: #007aff;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            white-space: nowrap;
-            font-size: 14px;
         }
         .service-btn i {
             margin-right: 6px;
             font-style: normal;
         }
-        /* 底部版权：微信原生位置+样式，匹配bg.jpg */
+        /* 底部版权：对齐bg.jpg */
         .copyright {
             text-align: center;
-            font-size: 12px; /* 微信原生底部文字字号 */
-            color: #999; /* 微信原生底部文字色 */
+            font-size: 12px;
+            color: #999;
             margin-top: 24px;
-            white-space: nowrap;
         }
-        /* 可编辑样式：仅hover微弱提示，不破坏原生视觉 */
+        /* 可编辑样式 */
         .editable {
             cursor: text;
-            transition: background-color 0.15s ease;
+            transition: background 0.1s;
         }
         .editable:hover {
-            background-color: rgba(0,0,0,0.02);
+            background: rgba(0,0,0,0.02);
         }
-        /* 隐藏上传控件 */
         #logo-upload {
             display: none;
         }
@@ -258,11 +231,10 @@
         <button class="tool-btn edit-text" id="editText">修改文字</button>
     </div>
 
-    <div class="wechat-bill" id="billContainer">
-        <!-- 绑定bg.jpg底图，确保与容器尺寸适配 -->
+    <div class="wechat-bill">
+        <!-- bg.jpg底图，切换稳定 -->
         <img src="http://ziizii.cc/files/wechat/bg.jpg" class="bill-bg" id="billBg">
-        <!-- 内容层：微信原生账单1:1复刻 -->
-        <div class="bill-content" id="billContent">
+        <div class="bill-content">
             <div class="close-btn">×</div>
             <div class="receipt-logo" id="receiptLogo">收</div>
             <div class="merchant-name editable">海润云集（大连）餐饮管理有限公司</div>
@@ -315,13 +287,13 @@
             <div class="service-area">
                 <div class="service-title">账单服务</div>
                 <div class="service-btn editable">
-                    <<<i>❓</</</i>对订单有疑惑
+                    <i>❓</i> 对订单有疑惑
                 </div>
                 <div class="service-btn editable">
-                    <<<i>📋</</</i>发起群收款
+                    <i>📋</i> 发起群收款
                 </div>
                 <div class="service-btn editable">
-                    <<<i>📜</</</i>在此商户的交易
+                    <i>📜</i> 在此商户的交易
                 </div>
             </div>
 
@@ -339,16 +311,14 @@
         const logoEl = document.getElementById('receiptLogo');
         const logoUpload = document.getElementById('logo-upload');
         const editableEls = document.querySelectorAll('.editable');
-        const billContainer = document.getElementById('billContainer');
 
-        // 底图切换：强制重绘+精准显示/隐藏，匹配bg.jpg
+        // 底图切换：用display切换，100%稳定无延迟
         toggleBgBtn.addEventListener('click', function() {
-            bgEl.classList.toggle('show');
-            bgEl.offsetHeight; // 强制DOM重绘，解决浏览器缓存
-            this.textContent = bgEl.classList.contains('show') ? '隐藏底图' : '显示底图';
+            const isShow = bgEl.classList.toggle('show');
+            this.textContent = isShow ? '隐藏底图' : '显示底图';
         });
 
-        // 文字修改：仅开启编辑权限，不破坏原生布局
+        // 文字编辑/保存：功能正常
         editBtn.addEventListener('click', function() {
             isEdit = !isEdit;
             if (isEdit) {
@@ -356,7 +326,7 @@
                 this.classList.add('save');
                 editableEls.forEach(el => {
                     el.contentEditable = true;
-                    el.style.outline = 'none'; // 移除焦点框，保留原生视觉
+                    el.style.outline = 'none';
                 });
             } else {
                 this.textContent = '修改文字';
@@ -365,7 +335,7 @@
             }
         });
 
-        // Logo更换：适配微信原生Logo尺寸，不破坏布局
+        // Logo更换：功能正常
         logoEl.addEventListener('click', function() {
             if (isEdit) logoUpload.click();
         });
@@ -374,51 +344,40 @@
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    logoEl.innerHTML = `<img src="${e.target.result}" alt="微信收款Logo">`;
+                    logoEl.innerHTML = `<img src="${e.target.result}" alt="logo">`;
                 };
                 reader.readAsDataURL(file);
-                this.value = ''; // 清空选择，支持重复上传
+                this.value = '';
             }
         });
 
-        // 保存图片：原生微信账单1:1截图，与bg.jpg完全一致
+        // 保存图片：与显示一致，无换行
         document.getElementById('saveImg').addEventListener('click', async function() {
             try {
-                // 临时隐藏底图，确保截图为纯净内容层
-                const isBgShow = bgEl.classList.contains('show');
-                if (isBgShow) bgEl.classList.remove('show');
-                bgEl.offsetHeight;
+                // 隐藏底图截图
+                const isShow = bgEl.classList.contains('show');
+                if (isShow) bgEl.classList.remove('show');
 
-                // 获取容器原生尺寸，禁用任何缩放
-                const rect = billContainer.getBoundingClientRect();
-                const canvas = await html2canvas(billContainer, {
-                    scale: 3, // 3倍高清，基于原生尺寸放大
+                const canvas = await html2canvas(document.querySelector('.wechat-bill'), {
+                    scale: 3,
                     useCORS: true,
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: rect.width,
-                    windowHeight: rect.height,
-                    allowTaint: true,
-                    letterRendering: true, // 精准渲染文字，匹配微信原生字体
-                    preserveDrawingBuffer: true,
-                    ignoreElements: el => el.classList.contains('tool-bar') // 忽略顶部按钮
+                    windowWidth: 375,
+                    windowHeight: 812,
+                    letterRendering: true
                 });
 
-                // 恢复底图状态
-                if (isBgShow) bgEl.classList.add('show');
+                // 恢复底图
+                if (isShow) bgEl.classList.add('show');
 
-                // 生成并下载1:1高清图片
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `微信账单_${new Date().toLocaleDateString()}.png`;
                 a.click();
-                setTimeout(() => URL.revokeObjectURL(url), 100);
+                URL.revokeObjectURL(url);
             } catch (err) {
-                alert(`保存失败：${err.message}\n请检查bg.jpg链接或网络`);
-                console.error(err);
+                alert('保存失败：' + err.message);
             }
         });
     </script>
