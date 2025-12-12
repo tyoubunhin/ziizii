@@ -71,12 +71,13 @@
         .edit-save-btn.save-state:hover {
             background-color: #c82333;
         }
+        /* 优化1：匹配底图比例，容器宽度微调 */
         .bg-wrapper {
             position: relative;
             width: 100%;
-            max-width: 450px;
+            max-width: 414px; /* 基于底图比例调整，避免内容过宽 */
             min-width: 375px;
-            min-height: 600px;
+            min-height: 736px; /* 适配手机竖屏高度，匹配底图 */
             height: auto !important;
             background-color: #fff;
             border-radius: 12px;
@@ -95,6 +96,7 @@
         .bill-bg-img.hidden {
             opacity: 0;
         }
+        /* 优化2：内容层与底图精准对齐，调整内边距 */
         .bill-content {
             position: absolute;
             top: 0;
@@ -102,7 +104,7 @@
             width: 100%;
             height: auto !important;
             min-height: 100%;
-            padding: 10px 25px !important;
+            padding: 25px 20px 20px !important; /* 上25px匹配底图顶部留白，左右20px更紧凑 */
             background-color: transparent;
             border: none !important;
             overflow: visible;
@@ -121,19 +123,20 @@
             text-decoration: none !important;
             background-color: transparent !important;
         }
+        /* 优化3：Logo位置匹配底图，调整大小和间距 */
         .receipt-logo {
-            width: 70px;
-            height: 70px;
+            width: 64px; /* 缩小至底图匹配尺寸 */
+            height: 64px;
             max-width: none;
             max-height: none;
             border-radius: 50%;
             background-color: #07C160 !important;
-            margin: 50px auto 25px;
+            margin: 30px auto 20px; /* 上30px匹配底图Logo位置，下20px减少拥挤 */
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff !important;
-            font-size: 32px;
+            font-size: 28px; /* 字体缩小，匹配Logo尺寸 */
             font-weight: 400 !important;
             cursor: pointer;
             overflow: hidden;
@@ -150,74 +153,73 @@
         }
         .close-icon {
             position: absolute;
-            top: 25px;
-            left: 25px;
-            font-size: 22px;
-            color: #999 !important;
+            top: 32px; /* 上移至底图关闭按钮位置 */
+            left: 20px;
+            font-size: 20px; /* 缩小匹配底图 */
+            color: #666 !important; /* 加深颜色，匹配底图关闭图标 */
             cursor: pointer;
             line-height: 1;
         }
         .bill-header {
             text-align: center;
-            padding: 15px 0 25px;
+            padding: 10px 0 20px; /* 减少上下 padding，更紧凑 */
         }
         .merchant-title {
-            font-size: 17px;
+            font-size: 16px; /* 缩小字体，匹配底图商户名大小 */
             color: #333;
-            margin-bottom: 18px;
-            line-height: 1.6;
+            margin-bottom: 15px;
+            line-height: 1.5;
             font-weight: 400 !important;
         }
-        /* 核心调整：价格字体+颜色，完全匹配你的截图 */
+        /* 核心：价格字体+颜色，匹配底图视觉 */
         .amount-text {
-            font-size: 42px; /* 如需调整大小，可修改此数值 */
-            color: #333 !important; /* 已改为匹配你截图的颜色（若需其他色值，替换#333即可） */
+            font-size: 38px; /* 缩小至底图价格尺寸 */
+            color: #333 !important; /* 与底图文字颜色一致 */
             font-weight: 500;
-            /* 已改为你提供的字体（请确认字体名称正确，若字体需本地引入，需补充@font-face） */
-            font-family: "你的字体名称", "Wechat Sans Std", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
-            margin-bottom: 8px;
+            font-family: "PingFang SC", "Wechat Sans Std", "Helvetica Neue", Arial, sans-serif !important; /* 优先使用系统默认字体，避免缺失 */
+            margin-bottom: 5px;
             line-height: 1.2;
         }
         .detail-list {
-            padding: 8px 0 30px;
-            font-size: 15px;
+            padding: 5px 0 25px;
+            font-size: 14px; /* 缩小字体，匹配底图详情文字 */
         }
         .detail-item {
             display: flex;
-            margin-bottom: 22px;
-            line-height: 1.7;
+            margin-bottom: 18px; /* 减少行间距，更紧凑 */
+            line-height: 1.6;
         }
         .detail-label {
-            width: 110px;
+            width: 100px; /* 缩小标签宽度，匹配底图 */
             max-width: none;
-            color: #999;
+            color: #888 !important; /* 标签色变浅，匹配底图 */
             flex-shrink: 0;
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 400 !important;
         }
         .detail-value {
             flex: 1;
             color: #333;
             word-break: break-all;
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 400 !important;
         }
         .sub-detail {
             color: #666;
-            margin-top: 4px;
-            font-size: 13px;
-            line-height: 1.7;
+            margin-top: 3px;
+            font-size: 12px; /* 缩小说明文字，匹配底图 */
+            line-height: 1.6;
             font-weight: 400 !important;
         }
         .mini-program-area {
-            padding: 18px 0;
-            font-size: 15px;
+            padding: 15px 0;
+            font-size: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid #eee !important;
-            border-bottom: 1px solid #eee !important;
-            margin: 0 0 25px;
+            border-top: 1px solid #f2f2f2 !important; /* 边框色变浅，匹配底图 */
+            border-bottom: 1px solid #f2f2f2 !important;
+            margin: 0 0 20px;
         }
         .mini-program-label {
             color: #333;
@@ -230,49 +232,49 @@
             text-decoration: none;
         }
         .arrow-icon {
-            width: 16px;
-            height: 16px;
+            width: 14px; /* 缩小箭头，匹配底图 */
+            height: 14px;
             max-width: none;
             max-height: none;
             border-top: 1px solid #007bff;
             border-right: 1px solid #007bff;
             transform: rotate(45deg);
-            margin-left: 8px;
+            margin-left: 6px;
         }
         .service-area {
-            padding: 8px 0 25px;
+            padding: 5px 0 20px;
         }
         .service-title {
-            font-size: 17px;
+            font-size: 15px; /* 缩小标题，匹配底图 */
             color: #333;
-            margin-bottom: 18px;
+            margin-bottom: 15px;
             font-weight: 400 !important;
         }
         .service-btn-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 18px;
+            gap: 12px; /* 减少按钮间距，更紧凑 */
+            margin-bottom: 15px;
         }
         .service-btn {
             color: #007bff;
-            font-size: 15px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             cursor: pointer;
             margin-bottom: 0;
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 400 !important;
         }
         .service-icon {
-            margin-right: 7px;
+            margin-right: 6px;
             font-style: normal;
-            font-size: 17px;
+            font-size: 16px;
         }
         .bill-footer {
-            padding: 15px 0 10px;
+            padding: 12px 0 8px;
             text-align: center;
-            font-size: 13px;
+            font-size: 12px; /* 缩小底部文字，匹配底图 */
             color: #999 !important;
             margin-top: 0;
             font-weight: 400 !important;
@@ -299,7 +301,6 @@
             <div class="bill-header">
                 <div class="receipt-logo" id="receiptLogo">收</div>
                 <div class="merchant-title editable-text">海润云集（大连）餐饮管理有限公司</div>
-                <!-- 可修改价格：字体和颜色已匹配你的截图 -->
                 <div class="amount-text editable-text">-0.01</div>
             </div>
             <div class="detail-list">
@@ -427,23 +428,25 @@
             }
         });
 
-        // 保存图片
+        // 保存图片（静默下载，高清晰度）
         const saveImgBtn = document.getElementById('saveImgBtn');
         saveImgBtn.addEventListener('click', async function() {
             try {
                 const isBgShow = !billBgImg.classList.contains('hidden');
                 if (isBgShow) billBgImg.classList.add('hidden');
 
-                await new Promise(resolve => setTimeout(resolve, 300));
+                // 等待底图完全隐藏，避免截图残留
+                await new Promise(resolve => setTimeout(resolve, 350));
 
                 const canvas = await html2canvas(billContent, {
-                    scale: 2,
+                    scale: 2.5, // 提升清晰度至2.5倍，保存图片更清晰
                     useCORS: true,
                     logging: false,
                     scrollY: 0,
                     scrollX: 0,
                     windowHeight: billContent.scrollHeight,
-                    allowTaint: true
+                    allowTaint: true,
+                    ignoreElements: (el) => el.classList.contains('top-btn-group') // 忽略顶部按钮，不纳入截图
                 });
 
                 const date = new Date().toLocaleDateString().replace(/\//g, '-');
