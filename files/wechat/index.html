@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>微信账单1:1还原版（底图对比版）</title>
+    <title>微信账单像素级1:1复刻版</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
@@ -20,7 +20,7 @@
             min-height: 100vh;
             padding: 20px;
         }
-        /* 顶部按钮 */
+        /* 顶部功能按钮 */
         .tool-bar {
             position: fixed;
             top: 20px;
@@ -52,65 +52,76 @@
             background: #dc3545;
             color: #fff;
         }
-        /* 账单容器：固定尺寸，底图和内容层都匹配此尺寸 */
+        /* 账单容器：完全匹配截图尺寸（365px宽，710px高） */
         .wechat-bill {
-            width: 370px;
-            height: 720px;
+            width: 365px;
+            height: 710px;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
             margin-top: 80px;
+            /* 禁止任何变形，确保截图一致 */
+            transform: none !important;
+            zoom: 1 !important;
         }
-        /* 底图层：关键修改——显示时不透明，方便对比；隐藏时完全透明 */
+        /* 底图层：仅作参考，显示时半透明 */
         .bill-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0; /* 默认隐藏 */
-            transition: opacity 0.3s ease-in-out; /* 平滑切换 */
+            opacity: 0;
+            transition: opacity 0.3s;
             z-index: 1;
-            object-fit: cover; /* 底图适配容器，不拉伸变形 */
+            object-fit: cover;
         }
         .bill-bg.show {
-            opacity: 1; /* 显示时完全不透明，清晰对比 */
+            opacity: 0.3; /* 半透明显示，方便对比但不干扰 */
         }
-        /* 内容层：关键修改——透明背景，让底图透出来方便对比 */
+        /* 内容层：唯一显示层，像素级匹配截图 */
         .bill-content {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 30px 25px;
+            padding: 28px 22px;
             z-index: 2;
-            background: transparent; /* 透明背景，显示底图 */
+            background: #fff;
         }
-        /* 关闭按钮 */
+        /* 关闭按钮：双叉+像素级位置，匹配截图 */
         .close-btn {
             position: absolute;
-            top: 30px;
-            left: 25px;
-            font-size: 20px;
+            top: 28px;
+            left: 22px;
+            font-size: 18px;
             color: #666;
             cursor: pointer;
             z-index: 3;
+            line-height: 1;
         }
-        /* Logo */
+        .close-btn::after {
+            content: "×";
+            position: absolute;
+            top: -8px;
+            left: 0;
+            font-size: 18px;
+        }
+        /* 收款Logo：匹配截图的大小和位置 */
         .receipt-logo {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             background: #07C160;
-            margin: 20px auto 10px;
+            margin: 18px auto 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 26px;
+            font-size: 24px;
             cursor: pointer;
             overflow: hidden;
         }
@@ -119,67 +130,75 @@
             height: 100%;
             object-fit: cover;
         }
-        /* 商户名：禁止换行 */
+        /* 商户名：双行显示+像素级大小/位置，匹配截图 */
         .merchant-name {
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             color: #333;
-            line-height: 1.4;
-            margin-bottom: 8px;
+            line-height: 1.3;
+            margin-bottom: 5px;
             white-space: nowrap;
         }
-        /* 金额：Wechat Sans Std字体+禁止换行 */
+        .merchant-name.duplicate {
+            margin-bottom: 8px; /* 匹配截图的双行商户名间距 */
+        }
+        /* 金额：Wechat Sans Std字体+截图同款大小/位置/颜色 */
         .amount {
             text-align: center;
-            font-size: 38px;
+            font-size: 36px;
             color: #333;
             font-weight: 500;
-            font-family: "Wechat Sans Std", "Wechat Sans", "PingFang SC", "微软雅黑", sans-serif !important;
-            margin-bottom: 25px;
+            font-family: "Wechat Sans Std", "Wechat Sans", "PingFang SC", sans-serif !important;
+            margin-bottom: 22px;
             line-height: 1.2;
             white-space: nowrap;
+            position: relative;
+            left: -2px; /* 像素级偏移，匹配截图 */
         }
-        /* 详情列表：精准控制换行 */
+        /* 详情列表：逐行像素级匹配截图的位置/大小/颜色 */
         .detail-list {
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 12px;
+            line-height: 1.5;
             width: 100%;
+            margin-left: 3px; /* 整体偏移，匹配截图 */
         }
         .detail-item {
             display: flex;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             align-items: flex-start;
             width: 100%;
         }
         .detail-label {
-            width: 85px;
-            color: #999;
+            width: 80px;
+            color: #888;
             flex-shrink: 0;
             white-space: nowrap;
+            font-size: 12px;
         }
         .detail-value {
             color: #333;
             flex: 1;
-            word-break: break-all; /* 仅长单号换行 */
+            font-size: 12px;
+            word-break: break-all;
         }
         .detail-sub {
             color: #666;
-            font-size: 12px;
-            margin-left: 85px;
+            font-size: 11px;
+            margin-left: 80px;
             margin-top: 2px;
-            white-space: normal;
+            margin-bottom: 6px;
         }
-        /* 小程序区域：禁止换行 */
+        /* 小程序区域：匹配截图的位置/颜色/大小 */
         .mini-program {
-            margin: 15px 0;
-            padding: 10px 0;
+            margin: 12px 0;
+            padding: 8px 0;
             border-top: 1px solid #f2f2f2;
             border-bottom: 1px solid #f2f2f2;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
-            white-space: nowrap;
+            font-size: 12px;
+            margin-left: 3px;
         }
         .mini-program a {
             color: #007bff;
@@ -188,43 +207,48 @@
             align-items: center;
         }
         .arrow {
-            width: 10px;
-            height: 10px;
+            width: 9px;
+            height: 9px;
             border-top: 1px solid #007bff;
             border-right: 1px solid #007bff;
             transform: rotate(45deg);
-            margin-left: 5px;
+            margin-left: 4px;
         }
-        /* 服务区域：禁止不必要换行 */
+        /* 服务区域：匹配截图的文字大小/颜色/位置 */
         .service-area {
-            margin: 15px 0;
-            font-size: 13px;
+            margin: 12px 0 18px 3px;
+            font-size: 12px;
         }
         .service-title {
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             white-space: nowrap;
+            font-size: 12px;
         }
         .service-btn {
             color: #007bff;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             white-space: nowrap;
+            font-size: 12px;
         }
         .service-btn i {
-            margin-right: 5px;
+            margin-right: 4px;
             font-style: normal;
         }
-        /* 底部文字：禁止换行 */
+        /* 底部版权：双行显示+匹配截图的大小/位置/颜色 */
         .copyright {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: #999;
-            margin-top: 20px;
+            margin-top: 15px;
             white-space: nowrap;
         }
-        /* 可编辑样式 */
+        .copyright.duplicate {
+            margin-top: 3px;
+        }
+        /* 可编辑样式：仅hover提示，不破坏还原 */
         .editable {
             cursor: text;
             transition: background 0.1s;
@@ -246,47 +270,48 @@
     </div>
 
     <div class="wechat-bill" id="billContainer">
-        <!-- 底图链接确保有效，与容器尺寸匹配 -->
         <img src="http://ziizii.cc/files/wechat/bg.jpg" class="bill-bg" id="billBg">
         <div class="bill-content" id="billContent">
             <div class="close-btn">×</div>
             <div class="receipt-logo" id="receiptLogo">收</div>
-            <div class="merchant-name editable" id="merchantName">海润云集（大连）餐饮管理有限公司</div>
-            <div class="amount editable" id="amount">-0.01</div>
+            <!-- 双行商户名，匹配截图 -->
+            <div class="merchant-name editable duplicate">海润云集（大连）餐饮管理有限公司</div>
+            <div class="merchant-name editable">海润云集（大连）餐饮管理有限公司</div>
+            <div class="amount editable">-0.01</div>
             
             <div class="detail-list">
                 <div class="detail-item">
                     <div class="detail-label">当前状态</div>
-                    <div class="detail-value editable" id="status">支付成功</div>
+                    <div class="detail-value editable">支付成功</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">支付时间</div>
-                    <div class="detail-value editable" id="payTime">2025年12月10日 20:15:15</div>
+                    <div class="detail-value editable">2025年12月10日 20:15:15</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">商品</div>
-                    <div class="detail-value editable" id="goods">海润云集（大连）餐饮管理有限公司</div>
+                    <div class="detail-value editable">海润云集（大连）餐饮管理有限公司</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">商户全称</div>
-                    <div class="detail-value editable" id="merchantFull">海润云集（大连）餐饮管理有限公司</div>
+                    <div class="detail-value editable">海润云集（大连）餐饮管理有限公司</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">收单机构</div>
-                    <div class="detail-value editable" id="acquirer">拉卡拉支付股份有限公司</div>
+                    <div class="detail-value editable">拉卡拉支付股份有限公司</div>
                 </div>
-                <div class="detail-sub editable" id="clearance">由中国银联股份有限公司提供收款清算服务</div>
+                <div class="detail-sub editable">由中国银联股份有限公司提供收款清算服务</div>
                 <div class="detail-item">
                     <div class="detail-label">支付方式</div>
-                    <div class="detail-value" id="payMethod">零钱</div>
+                    <div class="detail-value editable">零钱</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">交易单号</div>
-                    <div class="detail-value editable" id="tradeNo">4200002932202512106848274822</div>
+                    <div class="detail-value editable">4200002932202512106848274822</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">商户单号</div>
-                    <div class="detail-value editable" id="merchantNo">7895212030418246</div>
+                    <div class="detail-value editable">7895212030418246</div>
                 </div>
             </div>
 
@@ -300,18 +325,20 @@
 
             <div class="service-area">
                 <div class="service-title">账单服务</div>
-                <div class="service-btn">
-                    <<i>❓</</i>对订单有疑惑
+                <div class="service-btn editable">
+                    <<<i>❓</</i>对订单有疑惑
                 </div>
-                <div class="service-btn">
-                    <<i>📋</</i>发起群收款
+                <div class="service-btn editable">
+                    <<<i>📋</</i>发起群收款
                 </div>
-                <div class="service-btn">
-                    <<i>📜</</i>在此商户的交易
+                <div class="service-btn editable">
+                    <<<i>📜</</i>在此商户的交易
                 </div>
             </div>
 
-            <div class="copyright">本服务由财付通提供</div>
+            <!-- 双行版权，匹配截图 -->
+            <div class="copyright editable">本服务由财付通提供</div>
+            <div class="copyright editable duplicate">本服务由财付通提供</div>
         </div>
     </div>
 
@@ -327,15 +354,14 @@
         const editableEls = document.querySelectorAll('.editable');
         const billContainer = document.getElementById('billContainer');
 
-        // 修复底图切换：强制触发重绘，确保视觉变化
+        // 底图切换：强制重绘确保视觉变化
         toggleBgBtn.addEventListener('click', function() {
             bgEl.classList.toggle('show');
-            // 强制DOM重绘，解决浏览器渲染缓存问题
-            bgEl.offsetHeight; 
+            bgEl.offsetHeight; // 强制DOM重绘
             this.textContent = bgEl.classList.contains('show') ? '隐藏底图' : '显示底图';
         });
 
-        // 文字修改/保存
+        // 文字修改/保存：支持所有可编辑元素
         editBtn.addEventListener('click', function() {
             isEdit = !isEdit;
             if (isEdit) {
@@ -352,7 +378,7 @@
             }
         });
 
-        // Logo更换
+        // Logo更换功能
         logoEl.addEventListener('click', function() {
             if (isEdit) logoUpload.click();
         });
@@ -368,34 +394,53 @@
             }
         });
 
-        // 保存图片：隐藏底图，确保截图纯净无重影
+        // 保存图片：终极优化，确保和显示1:1无差异
         document.getElementById('saveImg').addEventListener('click', async function() {
             try {
+                // 临时隐藏底图，确保截图纯净
                 const isBgShow = bgEl.classList.contains('show');
                 if (isBgShow) bgEl.classList.remove('show');
-                bgEl.offsetHeight; // 强制重绘
+                bgEl.offsetHeight;
 
-                const containerWidth = billContainer.offsetWidth;
-                const containerHeight = billContainer.offsetHeight;
-
+                // 获取容器实际尺寸，禁用缩放
+                const rect = billContainer.getBoundingClientRect();
                 const canvas = await html2canvas(billContainer, {
-                    scale: 3,
+                    scale: 1, // 1:1原始比例截图，避免缩放变形
                     useCORS: true,
-                    windowWidth: containerWidth,
-                    windowHeight: containerHeight,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: rect.width,
+                    windowHeight: rect.height,
+                    allowTaint: true,
                     letterRendering: true,
-                    preserveDrawingBuffer: true
+                    preserveDrawingBuffer: true,
+                    // 禁用任何自动布局调整
+                    ignoreElements: (el) => el.classList.contains('tool-bar')
                 });
 
+                // 恢复底图状态
                 if (isBgShow) bgEl.classList.add('show');
 
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+                // 生成高清图片（3倍缩放）
+                const hdCanvas = document.createElement('canvas');
+                hdCanvas.width = rect.width * 3;
+                hdCanvas.height = rect.height * 3;
+                const ctx = hdCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0, hdCanvas.width, hdCanvas.height);
+
+                // 下载图片
+                const blob = await new Promise(resolve => hdCanvas.toBlob(resolve, 'image/png', 1.0));
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `微信账单_${new Date().toLocaleDateString()}.png`;
                 a.click();
-                setTimeout(() => URL.revokeObjectURL(url), 100);
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                    // 销毁临时画布，释放内存
+                    hdCanvas.remove();
+                }, 100);
             } catch (err) {
                 alert('保存失败：' + err.message);
                 console.error(err);
